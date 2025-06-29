@@ -30,6 +30,14 @@ export class Card {
       this.history.push(score);
       this.last_used = count
    }
+
+   to_json( given: String ) {
+      return {
+         question: this.question,
+         correct_answer: this.answer,
+         given_answer: given
+      }
+   }
    
 
 }
@@ -38,4 +46,15 @@ export type DeckJson = {
    name: String;
    cards: CardJson[];
    count: number;
+}
+
+/**
+* @property correct weither the question was answered correctly
+* @property feedback the ai feedback given
+* @property score the score the answer recived
+*/
+export type Response = {
+   correct: boolean,
+   feedback: String,
+   score: number,
 }

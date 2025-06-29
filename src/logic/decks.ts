@@ -1,17 +1,7 @@
 import { readFile } from "fs/promises";
-import { Card, CardJson, DeckJson } from "./cards";
+import { Card, CardJson, DeckJson, Response } from "./cards";
+import { ollama_compare } from "./ollama";
 
-
-/**
-* @property correct weither the question was answered correctly
-* @property feedback the ai feedback given
-* @property score the score the answer recived
-*/
-export type Response = {
-   correct: boolean,
-   feedback: String,
-   score: number,
-}
 
 class Deck {
    name: String;
@@ -32,7 +22,7 @@ class Deck {
    * @param evaluation_callback A function that should handle what's done with the card, presents it to the user, and returns a response
    * @returns [ correct: boolean, feedback: String ]
    */
-   pull_random( evaluation_callback: ( card: Card ) => Response ): [ correct: boolean, feedback: String ] | undefined {
+   async pull_random( evaluation_callback: ( card: Card ) => Promise<Response> ): Promise<[ correct: boolean, feedback: String ] | undefined> {
       const random_number: number = Math.floor(Math.random() * this.cards.size );
       const card = this.cards.get( 
          this.cards.keys()
@@ -40,7 +30,7 @@ class Deck {
       );
 
       if ( card !== undefined ) {
-         const response = evaluation_callback( card );
+         const response = await evaluation_callback( card );
          card.use( response.score, this.count );
          return [ response.correct, response.feedback ]
       }
@@ -52,9 +42,8 @@ class Deck {
    /**
    * Pulls the best possible card from the deck
    * @param evaluation_callback A function that should handle what's done with the card, presents it to the user, and returns a response
-   * @returns [ correct: boolean, feedback: String ]
-   */
-   pull_best( evaluation_callback: ( card: Card ) => Response ): [ correct: boolean, feedback: String ] | undefined {
+   * @returns [ correct: boolean, feedback: String ] */
+   async pull_best( evaluation_callback: ( card: Card ) => Promise<Response> ): Promise<[ correct: boolean, feedback: String ] | undefined> {
       let lowest = Number.MAX_VALUE;
       let lowest_key: String = "";
 
@@ -69,7 +58,7 @@ class Deck {
       const card = this.cards.get( lowest_key );
 
       if ( card !== undefined ) {
-         const response = evaluation_callback( card );
+         const response = await evaluation_callback( card );
          card.use( response.score, this.count );
          return [ response.correct, response.feedback ]
       }
@@ -117,8 +106,17 @@ class Decks {
 */
 function input_callback_builder( 
       input_source: ( card: Card ) => String, 
-      comparison_callback: ( card: Card, input: String ) => Response 
-   ): ( card: Card ) => Response 
+      comparison_callback: ( card: Card, input: String ) => Promise<Response>
+   ): ( card: Card ) => Promise<Response>
 {
    return ( card: Card ) => { return comparison_callback( card, input_source( card ) ) };
+}
+
+// An example of drawing a single card from a deck
+async function example() {
+  const decks = await Decks.create();
+  const deck = decks.get_deck( decks.list_decks()[1] );
+  const dummy_input = ( card: Card ) => { return "Input"; }
+  const best_card = await deck?.pull_best( input_callback_builder( dummy_input, ollama_compare ) )
+
 }
