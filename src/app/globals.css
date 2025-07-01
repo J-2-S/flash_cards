@@ -27,3 +27,18 @@ body {
    color: var(--foreground);
    font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes waveGradient {
+   0% {
+      background-position: 0% 50%;
+   }
+
+   100% {
+      background-position: 200% 50%;
+   }
+}
+
+.animated-gradient {
+   background-size: 200% 200%;
+   animation: waveGradient 8s linear infinite;
+}
