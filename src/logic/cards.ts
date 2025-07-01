@@ -1,4 +1,4 @@
-export type CardJson =  {
+export type CardJson = {
    question: String;
    answer: String;
    score: number;
@@ -13,7 +13,7 @@ export class Card {
    private history: number[];
    last_used: number;
 
-   constructor( card : CardJson ) {
+   constructor(card: CardJson) {
       this.question = card.question;
       this.answer = card.answer;
       this.score = card.score;
@@ -25,20 +25,30 @@ export class Card {
    * @param score the score the user recived
    * @param count the deck's count variable at the time of use
    */
-   use( score: number, count: number ) {
+   use(score: number, count: number) {
       this.history.shift();
       this.history.push(score);
       this.last_used = count
    }
 
-   to_json( given: String ) {
+   to_ollama(given: String) {
       return {
          question: this.question,
          correct_answer: this.answer,
          given_answer: given
       }
    }
-   
+   to_json(): CardJson {
+      return {
+         question: this.question,
+         answer: this.answer,
+         score: this.score,
+         history: this.history,
+         last_used: this.last_used,
+      }
+
+   }
+
 
 }
 
