@@ -30,7 +30,7 @@ export default function RootLayout({
          >
             <div className="flex flex-row flex-wrap h-full">
                <div className="flex flex-col h-full">
-                  <NavMenu />
+                  {/* <NavMenu /> */}
                </div>
                <div className="flex flex-col flex-1 h-full">
                   <div className="flex flex-col flex-1 h-full">
